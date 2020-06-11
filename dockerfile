@@ -4,10 +4,10 @@ ARG WORKING_DIR=/app
 WORKDIR ${WORKING_DIR}
 COPY ${GITHUB_WORKSPACE} /app
 
-RUN apt update
-RUN apt upgrade -y 
-RUN apt install python3.6
-RUN pip3 install requirements.txt
+RUN apt update && apt upgrade -y \
+    python3-pip && apt-get install python3.6 && \
+    pip3 install -r requirements.txt && \
+    apt autoremove -y
 # RUN pip3 install gevent flask boto3 awscli --- if requirements.txt dont have them specified and you dont want them in
 
 EXPOSE 5000
