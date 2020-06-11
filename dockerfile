@@ -6,7 +6,7 @@ COPY ${GITHUB_WORKSPACE} /app
 
 RUN apt update
 RUN apt upgrade -y 
-RUN apt install python3.8
+RUN apt install python3.6
 RUN pip3 install requirements.txt
 # RUN pip3 install gevent flask boto3 awscli --- if requirements.txt dont have them specified and you dont want them in
 
