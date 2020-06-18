@@ -13,5 +13,5 @@ RUN apt update && apt upgrade -y \
 EXPOSE 5000
 # Add others like 22 etc if you would like to ssh into the pod but not necessary
 
-# CMD ["python3", "web-s.py"]
+CMD ["python3", "web-s.py"]
 # ^ uncomment when you are able to run app locally succesful.
