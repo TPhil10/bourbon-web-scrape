@@ -5,12 +5,14 @@ import json
 import pymysql
 import configparser
 
-s3 = boto3.client('s3')
+region = 'us-east-1'
+
+s3 = boto3.client('s3', region_name=region)
 obj = s3.get_object(Bucket='bourbon-app', Key='config.ini')
 config = configparser.ConfigParser()
 config.read_string(obj['Body'].read().decode())
 
-secrets_manager = boto3.client('secretsmanager')
+secrets_manager = boto3.client('secretsmanager', region_name=region)
 rds_credentials = json.loads(
     secrets_manager.get_secret_value(SecretId=config['mysqlDB']['secretid'])['SecretString']
 )
