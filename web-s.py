@@ -1,8 +1,16 @@
-import requests, csv
+import requests, csv, urllib3
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from ins_db import tbl_insert
 from db_conn import connect
+
+requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+try:
+    requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+except AttributeError:
+    # no pyopenssl support used / needed / available
+    pass
 
 inventory = []
 url = 'https://www.abc.virginia.gov/webapi/inventory/mystore'
@@ -30,7 +38,7 @@ for store in storeResult:
             )
 
             try:
-                response = s.get(url,params=params)
+                response = s.get(url,params=params, verify=False)
                 response.raise_for_status()
             except requests.exceptions.HTTPError as err:
                 print(err)
