@@ -67,6 +67,7 @@ for store in storeResult:
 
         now = datetime.now()
         formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
+        print(formatted_date)
 
         for l in inventory:
             l.append(formatted_date)
