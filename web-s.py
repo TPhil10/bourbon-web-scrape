@@ -21,9 +21,9 @@ print("{} Running...".format(start_time))
 mydb = connect()
 cur = mydb.cursor()
 
-cur.execute("SELECT storeid FROM bourbon_stores where storeid = '294'")
+cur.execute("SELECT storeid FROM bourbon_stores")
 storeResult = cur.fetchall()
-cur.execute("SELECT productid FROM bourbon_desc where productid = '21236'")
+cur.execute("SELECT productid FROM bourbon_desc")
 prodResult = cur.fetchall()
 
 for store in storeResult:
