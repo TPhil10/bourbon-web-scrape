@@ -21,9 +21,9 @@ print("{} Running...".format(start_time))
 mydb = connect()
 cur = mydb.cursor()
 
-cur.execute("SELECT storeid FROM bourbon_stores")
+cur.execute("SELECT storeid FROM bourbon_stores where storeid = '294'")
 storeResult = cur.fetchall()
-cur.execute("SELECT productid FROM bourbon_desc")
+cur.execute("SELECT productid FROM bourbon_desc where productid = '21236'")
 prodResult = cur.fetchall()
 
 for store in storeResult:
@@ -53,28 +53,25 @@ for store in storeResult:
                     if item.tag == 'phoneNumber':
                         for phoneItem in item.getchildren():
                             inv_list.append(phoneItem.text)
+                    elif item.tag == 'quantity':
+                        inv_list.append(int(item.text))
+                    elif item.tag in ('longitude','latitude'):
+                        inv_list.append(float(item.text))
                     else: 
                         inv_list.append(item.text)
-                            
-                inventory.append(inv_list)
-                
-        for l in inventory:
-            for i in range(len(l)):
-                if i == 2:
-                    l[i] = 0 if int(l[i]) < 0 else int(l[i])
-                elif i in (4,5):
-                    l[i] = float(l[i])
+
+                if inv_list[2] > 0: #Remove any lists with 0 quantity
+                    inventory.append(inv_list)
 
         now = datetime.now()
         formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
-        print(formatted_date)
 
         for l in inventory:
             l.append(formatted_date)
 
         inventory = [tuple(i) for i in inventory] #comprehension
         end_time = datetime.now()
-        print(end_time - start_time)
+        print("Time to download: {}".format(end_time - start_time))
         cur.close()
         print("{} End of requests, starting database insert...".format(end_time))
         tbl_insert(inventory)
