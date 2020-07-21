@@ -49,9 +49,9 @@ for store in storeResult:
             inv_list = []
             for child in root.findall("./products/products"):
                 inv_list.append(child[0].text)
-                for item in child[1].getchildren():
+                for item in child[1]:
                     if item.tag == 'phoneNumber':
-                        for phoneItem in item.getchildren():
+                        for phoneItem in item:
                             inv_list.append(phoneItem.text)
                     elif item.tag == 'quantity':
                         inv_list.append(int(item.text))
