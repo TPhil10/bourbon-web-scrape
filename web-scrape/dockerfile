@@ -10,4 +10,4 @@ RUN apt update && apt upgrade -y \
     pip3 install -r requirements.txt && \
     apt autoremove -y
 
-CMD ["python3", "web-s.py"]
+CMD ["python3", "web-scrape/web-s.py"]
