@@ -23,7 +23,7 @@ except AttributeError:
     # no pyopenssl support used / needed / available
     pass
 
-max_workers = 15
+max_workers = 2
 
 start_time = datetime.now()
 logger.info("{} Running...".format(start_time.strftime('%m-%d-%Y %H:%M:%S')))
@@ -36,7 +36,8 @@ storeResult = cur.fetchall()
 cur.execute("SELECT productid FROM bourbon_desc")
 prodResult = cur.fetchall()
 
-url = 'https://abc.virginia.gov/webapi/inventory/mystore?storeNumbers={}&productCodes={}'
+url = 'https://www.abc.virginia.gov/webapi/inventory/storeNearby?storeNumber={}&productCode={}&mileRadius=999&storeCount=5&buffer=0'
+# url = 'https://abc.virginia.gov/webapi/inventory/mystore?storeNumbers={}&productCodes={}'
 url_list=[]
 inventory = []
 
@@ -48,7 +49,8 @@ for store in storeResult:
 # Retrieve a single page and report the url and contents
 def load_url(url):
     with requests.get(url) as conn:
-        return conn.content
+        if(conn.status_code == 200):
+            return conn.content
  
 def parse_data(data):
     root = ET.fromstring(data)
@@ -57,18 +59,19 @@ def parse_data(data):
     for child in root.findall("./products/products"):
         inv_list.append(child[0].text)
         for item in child[1]:
-            if item.tag == 'phoneNumber':
-                for phoneItem in item:
-                    inv_list.append(phoneItem.text)
-            elif item.tag == 'quantity':
-                inv_list.append(int(item.text))
-            elif item.tag in ('longitude','latitude'):
-                if item.text is None: #Sometimes the long/lat values are deleted off their site
+            if item.tag in ['storeId','PhoneNumber','quantity','longitude','latitude','distance']:
+                if item.tag == 'PhoneNumber':
+                    for phoneItem in item:
+                        inv_list.append(phoneItem.text)
+                elif item.tag == 'quantity':
+                    inv_list.append(int(item.text))
+                elif item.tag in ('longitude','latitude'):
+                    if item.text is None: #Sometimes the long/lat values are deleted off their site
+                        inv_list.append(item.text)
+                    else:
+                        inv_list.append(float(item.text))
+                else: 
                     inv_list.append(item.text)
-                else:
-                    inv_list.append(float(item.text))
-            else: 
-                inv_list.append(item.text)
 
         formatted_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         inv_list.append(formatted_date)
@@ -98,7 +101,8 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         except Exception as exc:
             logger.info('{} generated an exception: {}'.format(future_to_url[future], exc))
         else:
-            parse_data(data)
+            if data is not None:
+                parse_data(data)
 
             
 if (connect().open):
