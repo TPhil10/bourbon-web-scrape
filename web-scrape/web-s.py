@@ -1,5 +1,5 @@
 
-import requests, csv, urllib3, watchtower, logging, pymysql, sys, os, inspect
+import requests, csv, urllib3, watchtower, logging, pymysql, sys, os, inspect, time
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from emailer import emailer
@@ -37,7 +37,6 @@ cur.execute("SELECT productid FROM bourbon_desc")
 prodResult = cur.fetchall()
 
 url = 'https://www.abc.virginia.gov/webapi/inventory/storeNearby?storeNumber={}&productCode={}&mileRadius=999&storeCount=5&buffer=0'
-# url = 'https://abc.virginia.gov/webapi/inventory/mystore?storeNumbers={}&productCodes={}'
 url_list=[]
 inventory = []
 
@@ -48,9 +47,14 @@ for store in storeResult:
 
 # Retrieve a single page and report the url and contents
 def load_url(url):
-    with requests.get(url) as conn:
-        if(conn.status_code == 200):
+
+    time.sleep(1)
+    try:
+        with requests.get(url) as conn:
             return conn.content
+    except requests.exceptions.RequestException as e:
+        logger.info("Get called failed with: {}".format(e))
+        return None
  
 def parse_data(data):
     root = ET.fromstring(data)
@@ -95,14 +99,16 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
     for i, future in enumerate(concurrent.futures.as_completed(future_to_url), 1):
         try:
             data = future.result()
+
             if i % 500 == 0:
                 time_diff = datetime.now() - start_time
                 logger.info("Parsing url #: {} {} (Total time taken: {} seconds)".format(i, datetime.now().strftime('%m-%d-%Y %H:%M:%S'), time_diff.seconds ))
+
+            parse_data(data)
+
         except Exception as exc:
             logger.info('{} generated an exception: {}'.format(future_to_url[future], exc))
-        else:
-            if data is not None:
-                parse_data(data)
+
 
             
 if (connect().open):
