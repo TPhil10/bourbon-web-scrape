@@ -23,7 +23,7 @@ except AttributeError:
     # no pyopenssl support used / needed / available
     pass
 
-max_workers = 3
+max_workers = 4
 
 start_time = datetime.now()
 logger.info("{} Running...".format(start_time.strftime('%m-%d-%Y %H:%M:%S')))
